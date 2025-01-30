@@ -1,0 +1,17 @@
+fastapi
+uvicorn
+plivo
+boto3
+python-dotenv
+pydantic
+loguru
+pytest
+requests
+python-multipart
+aiofiles
+starlette
+typing-extensions
+pipecat-ai
+pipecat-ai[cartesia,openai,silero,deepgram]
+openai
+pydantic-settings
