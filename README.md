@@ -1,5 +1,28 @@
 # PipeCat Voice Agent
 
+PipeCat Voice Agent is an AI-powered voice communication system that enables intelligent, real-time phone conversations. The system integrates various technologies to provide a seamless voice interaction experience:
+
+## Core Features
+
+- **Real-time Voice Processing**: Utilizes WebSocket connections for bidirectional audio streaming
+- **Speech Recognition**: Integrates with Deepgram for accurate speech-to-text conversion
+- **Natural Language Processing**: Leverages OpenAI's GPT-4 for intelligent conversation handling
+- **Text-to-Speech**: Uses Cartesia for high-quality voice synthesis
+- **Telephony Integration**: Built on Plivo's platform for reliable call handling
+- **Call Recording**: Supports automatic call recording and storage
+- **Voice Activity Detection**: Implements Silero VAD for precise speech detection
+
+## Technical Stack
+
+- **Backend**: FastAPI (Python)
+- **Voice Processing**: PipeCat Pipeline System
+- **External Services**:
+  - Plivo (Telephony)
+  - OpenAI GPT-4 (LLM)
+  - Deepgram (STT)
+  - Cartesia (TTS)
+  - S3 (Recording Storage)
+
 ## Local Development with Plivo and ngrok
 
 To enable Plivo to reach your local development server, follow these steps:
