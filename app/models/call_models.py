@@ -3,12 +3,14 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
 
+
 class CallState(str, Enum):
-    INITIATED = "initiated"
-    IN_PROGRESS = "in-progress"
-    COMPLETED = "completed"
-    FAILED = "failed"
-    USER_BUSY = "user-busy"
+    INITIATED = "INITIATED"
+    INPROGRESS = "INPROGRESS"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
+    USERBUSY = "USERBUSY"
+
 
 class CallRecord(BaseModel):
     call_uuid: str

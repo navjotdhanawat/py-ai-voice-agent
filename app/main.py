@@ -10,21 +10,24 @@ load_dotenv()
 from app.config import settings
 from app.api.routes import router as api_router
 from app.api.websocket import handle_voice_websocket
-from app.pbot import run_bot
+from app.bot import run_bot
 
 app = FastAPI(
-    title="PipeCat AI Voice Agent",
+    title="Ontune AI Voice Agent",
     description="AI Voice Agent for handling calls using Plivo and S3",
-    version="1.0.0"
+    version="1.0.0",
 )
+
 
 @app.on_event("startup")
 async def startup_event():
     logger.info("Starting up PipeCat AI Voice Agent")
 
+
 @app.on_event("shutdown")
 async def shutdown_event():
     logger.info("Shutting down PipeCat AI Voice Agent")
+
 
 @app.websocket("/ws/voice/{call_uuid}")
 async def voice_websocket_endpoint(websocket: WebSocket, call_uuid: str):
@@ -47,11 +50,14 @@ async def voice_websocket_endpoint(websocket: WebSocket, call_uuid: str):
         except:
             pass
 
+
 app.include_router(api_router, prefix="/api/v1")
 
 if __name__ == "__main__":
     import debugpy
+
     debugpy.listen(("0.0.0.0", 5678))
     print("⚡️ Debugger is listening on port 5678")
     import uvicorn
+
     uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)

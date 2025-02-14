@@ -4,13 +4,14 @@ from typing import Dict, List, Optional, TypedDict
 from typing_extensions import Literal
 from openai.types.chat import ChatCompletionMessageParam
 from app.bot import run_voice_bot
-import json
+
 
 class CallStatus(TypedDict):
     status: Literal["in_progress", "completed", "error"]
     transcript: Optional[List[ChatCompletionMessageParam]]
     stereo_recording_url: Optional[str]
     error: Optional[str]
+
 
 class VoiceWebSocketManager:
     def __init__(self):
@@ -25,7 +26,7 @@ class VoiceWebSocketManager:
             "status": "in_progress",
             "transcript": None,
             "stereo_recording_url": None,
-            "error": None
+            "error": None,
         }
         self.voice_bots[call_uuid] = False
         logger.info(f"WebSocket connection established for call {call_uuid}")
@@ -47,28 +48,30 @@ class VoiceWebSocketManager:
                     # Initialize the voice bot for this call
                     self.voice_bots[call_uuid] = True
                     system_prompt = "You are an AI assistant helping with a phone call. Be concise and helpful."
-                    voice_id = "79a125e8-cd45-4c13-8a67-188112f4dd22"  # Default voice ID
-                    
+                    voice_id = (
+                        "79a125e8-cd45-4c13-8a67-188112f4dd22"  # Default voice ID
+                    )
+
                     # Start the voice bot in the background
                     transcript = await run_voice_bot(
                         system_prompt,
                         voice_id,
                         self.active_connections[call_uuid],
                         "stream_sid",  # This is a placeholder, you might want to store the actual stream_sid
-                        call_uuid
+                        call_uuid,
                     )
-                    
+
                     if transcript:
                         self.call_status[call_uuid]["transcript"] = transcript
                         self.call_status[call_uuid]["status"] = "completed"
-                    
+
             except Exception as e:
                 logger.error(f"Error processing audio for call {call_uuid}: {str(e)}")
                 self.call_status[call_uuid] = {
                     "status": "error",
                     "transcript": None,
                     "stereo_recording_url": None,
-                    "error": str(e)
+                    "error": str(e),
                 }
 
     def update_recording_url(self, call_uuid: str, recording_url: str):
@@ -80,7 +83,9 @@ class VoiceWebSocketManager:
         """Get the status of a call"""
         return self.call_status.get(call_uuid)
 
+
 voice_manager = VoiceWebSocketManager()
+
 
 async def handle_voice_websocket(websocket: WebSocket, call_uuid: str):
     await voice_manager.connect(websocket, call_uuid)

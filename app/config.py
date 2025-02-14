@@ -1,6 +1,7 @@
 from pydantic_settings import BaseSettings
 from typing import Optional
 
+
 class Settings(BaseSettings):
     # Plivo credentials
     PLIVO_AUTH_ID: str
@@ -17,17 +18,18 @@ class Settings(BaseSettings):
     APP_NAME: str = "PipeCat AI Voice Agent"
     DEBUG: bool = False
     API_PREFIX: str = "/api/v1"
-    BASE_URL: str 
+    BASE_URL: str
 
     # API Keys
     OPENAI_API_KEY: str = "your_openai_api_key"
     DEEPGRAM_API_KEY: str = "your_deepgram_api_key"
     CARTESIA_API_KEY: str = "your_cartesia_api_key"
-    
+    ELEVEN_API_KEY: str
+
     # Twilio Settings
     TWILIO_ACCOUNT_SID: str = "your_twilio_account_sid"
     TWILIO_AUTH_TOKEN: str = "your_twilio_auth_token"
-    
+
     # Other Settings
     NGROK_AUTH_TOKEN: str = "your_ngrok_auth_token"
     FIXA_KEY: str = "your_fixa_key"
@@ -35,5 +37,6 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = True
+
 
 settings = Settings()
