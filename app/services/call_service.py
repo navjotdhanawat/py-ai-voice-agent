@@ -1,9 +1,11 @@
 import plivo
 import boto3
+import uuid
 from loguru import logger
 from datetime import datetime
 from app.config import settings
 from app.models.call_models import CallRecord, CallState
+import requests
 
 
 class CallService:
@@ -20,26 +22,32 @@ class CallService:
 
     async def make_outbound_call(self, to_number: str) -> CallRecord:
         try:
+            call_uuid = str(uuid.uuid4())
             # Make actual Plivo outbound call
             response = self.plivo_client.calls.create(
+                ring_url="https://ontune.s3.ap-south-1.amazonaws.com/ringbacktone-original.mp3",
                 from_=settings.PLIVO_FROM_NUMBER,
                 to_=to_number,
-                answer_url=f"{settings.BASE_URL}/api/v1/calls/answer",
+                answer_url=f"{settings.BASE_URL}/api/v1/calls/answer/{call_uuid}",
                 answer_method="POST",
-                hangup_url=f"{settings.BASE_URL}/api/v1/calls/hangup",
+                hangup_url=f"{settings.BASE_URL}/api/v1/calls/hangup/{call_uuid}",
                 hangup_method="POST",
             )
+
+            # Create and return proper CallRecord object instead of dict
             call_record = CallRecord(
-                call_uuid=response.request_uuid,
+                call_uuid=call_uuid,
                 from_number=settings.PLIVO_FROM_NUMBER,
                 to_number=to_number,
                 direction="outbound",
                 state=CallState.INITIATED,
                 start_time=datetime.now(),
             )
+
             logger.info(f"Initiated outbound call to {to_number}")
             return call_record
         except Exception as e:
+            # TODO: update call failed status
             logger.error(f"Failed to make outbound call: {str(e)}")
             raise
 

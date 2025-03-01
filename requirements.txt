@@ -12,6 +12,6 @@ aiofiles
 starlette
 typing-extensions
 pipecat-ai==0.0.53
-pipecat-ai[cartesia,openai,silero,deepgram,elevenlabs]
+pipecat-ai[cartesia,openai,silero,deepgram,elevenlabs,soundfile]
 openai
 pydantic-settings

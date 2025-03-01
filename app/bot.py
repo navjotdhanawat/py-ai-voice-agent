@@ -20,6 +20,8 @@ from pipecat.services.cartesia import CartesiaTTSService
 from pipecat.services.elevenlabs import ElevenLabsTTSService
 from pipecat.services.deepgram import DeepgramSTTService
 from pipecat.services.openai import OpenAILLMService
+from pipecat.audio.mixers.soundfile_mixer import SoundfileMixer
+from pipecat.processors.transcript_processor import TranscriptProcessor
 from pipecat.transports.network.fastapi_websocket import (
     FastAPIWebsocketParams,
     FastAPIWebsocketTransport,
@@ -38,7 +40,28 @@ logger.add(sys.stderr, format="{time} {level} {message}", level="INFO")
 logger.add(sys.stderr, level="DEBUG")
 
 
+class TranscriptHandler:
+    def __init__(self):
+        self.messages = []
+
+    async def on_transcript_update(self, processor, frame):
+        self.messages.extend(frame.messages)
+
+        # Log new messages with timestamps
+        for msg in frame.messages:
+            timestamp = f"[{msg.timestamp}] " if msg.timestamp else ""
+            print(f"TTTT: {timestamp}{msg.role}: {msg.content}")
+
+
 async def run_bot(websocket_client, stream_sid):
+    mixer = SoundfileMixer(
+        sound_files={
+            "office": os.path.join(os.path.dirname(__file__), "office_ambience.wav")
+        },
+        default_sound="office",
+        volume=1.0,
+    )
+
     transport = FastAPIWebsocketTransport(
         websocket=websocket_client,
         params=FastAPIWebsocketParams(
@@ -48,6 +71,7 @@ async def run_bot(websocket_client, stream_sid):
             vad_analyzer=SileroVADAnalyzer(),
             vad_audio_passthrough=True,
             serializer=PlivoFrameSerializer(stream_sid),
+            audio_out_mixer=mixer,
         ),
     )
 
@@ -70,19 +94,29 @@ async def run_bot(websocket_client, stream_sid):
     context = OpenAILLMContext(messages)
     context_aggregator = llm.create_context_aggregator(context)
 
+    transcript = TranscriptProcessor()
+
     pipeline = Pipeline(
         [
             transport.input(),  # Websocket input from client
             stt,  # Speech-To-Text
+            transcript.user(),
             context_aggregator.user(),
             llm,  # LLM
             tts,  # Text-To-Speech
             transport.output(),  # Websocket output to client
             context_aggregator.assistant(),
+            transcript.assistant(),
         ]
     )
 
     task = PipelineTask(pipeline, params=PipelineParams(allow_interruptions=True))
+
+    handler = TranscriptHandler()
+
+    @transcript.event_handler("on_transcript_update")
+    async def on_update(processor, frame):
+        await handler.on_transcript_update(processor, frame)
 
     @transport.event_handler("on_client_connected")
     async def on_client_connected(transport, client):

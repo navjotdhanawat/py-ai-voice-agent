@@ -1,0 +1,19 @@
+Outbound call
+    - Voice pipeline with dynamic configuration
+    - Noise filter
+    - background noise
+Call status
+    - INITIATED
+    - FAILED
+    - COMPLETED
+    - REJECTED
+    - USER BUSY
+Transcription
+    - Save transcription
+Recordings
+    - Save to s3 once call finished
+Function calling
+    - Predefined
+    - Custom with webhook calls
+Post call analysis
+

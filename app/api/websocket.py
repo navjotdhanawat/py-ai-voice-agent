@@ -3,7 +3,7 @@ from loguru import logger
 from typing import Dict, List, Optional, TypedDict
 from typing_extensions import Literal
 from openai.types.chat import ChatCompletionMessageParam
-from app.bot import run_voice_bot
+from app.bot import run_bot
 
 
 class CallStatus(TypedDict):
@@ -23,7 +23,7 @@ class VoiceWebSocketManager:
         await websocket.accept()
         self.active_connections[call_uuid] = websocket
         self.call_status[call_uuid] = {
-            "status": "in_progress",
+            "status": "INPROGRESS",
             "transcript": None,
             "stereo_recording_url": None,
             "error": None,
@@ -53,14 +53,14 @@ class VoiceWebSocketManager:
                     )
 
                     # Start the voice bot in the background
-                    transcript = await run_voice_bot(
+                    transcript = await run_bot(
                         system_prompt,
                         voice_id,
                         self.active_connections[call_uuid],
                         "stream_sid",  # This is a placeholder, you might want to store the actual stream_sid
                         call_uuid,
                     )
-
+                    logger.info(f"transcript........{transcript}")
                     if transcript:
                         self.call_status[call_uuid]["transcript"] = transcript
                         self.call_status[call_uuid]["status"] = "completed"
